@@ -81,8 +81,8 @@ def scrape_all():
         except BaseException:
             return None
         #Assign columns and set index to description column.
-        df.columns=['description', 'value']
-        df.set_index('description', inplace=True)
+        df.columns=['Description', 'Value']
+        df.set_index('Description', inplace=True)
         
         #convert the df back to html to upload it on our website.
         return df.to_html()
@@ -91,12 +91,27 @@ def scrape_all():
     
     def hemisphere_data(browser):
         hemi_data=[]
-        hemispheres=['Cerberus Hemisphere Enhanced', 'Schiaparelli Hemisphere Enhanced', 'Syrtis Major Hemisphere Enhanced', 'Valles Marineris Hemisphere Enhanced']
-        #  hemisphere_data=[hemisphere_data(hemisphere) for hemisphere in hemisphere]
+        # hemispheres=['Cerberus Hemisphere Enhanced', 'Schiaparelli Hemisphere Enhanced', 'Syrtis Major Hemisphere Enhanced', 'Valles Marineris Hemisphere Enhanced']
+        
         # Visit URL
         url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+        browser.visit(url)
         
-        
+        # Parse the resulting html with soup
+        html = browser.html
+        soup = BeautifulSoup(html, 'html.parser')
+
+        #Grab parent element as pe.
+        pe=soup.find('div', class_="collapsible results")
+        #From the parent element get all the items.
+        results=pe.find_all('div',class_="item")
+
+        #From above items scarpe out the h3 text with a for loop.
+        hemispheres=[]
+        for result in results:
+            hemi=result.find("h3").text
+            hemispheres.append(hemi)
+
         # Find the hempisphere link and click that
         for hemisphere in hemispheres:
             browser.visit(url)
